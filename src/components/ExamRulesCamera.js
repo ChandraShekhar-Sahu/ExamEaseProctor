@@ -40,7 +40,7 @@ const ExamRulesCamera = () => {
     formData.append("image", blob, "captured_photo.png");
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/api/upload_photo/", {
+        const response = await fetch("https://exameaseproctor.onrender.com/api/upload_photo/", {
             method: "POST",
             body: formData,
             headers: {
