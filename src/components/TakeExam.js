@@ -632,7 +632,7 @@ setTimeout(() => {
       <>
       {/* <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" /> */}
       <FaceUploader
-      backendUrl="http://127.0.0.1:8000/api/verify_face/" 
+      backendUrl="https://exameaseproctor.onrender.com/api/verify_face/" 
       onViolation={handleCheating}
       examEnded={examEnded}
       onNormalCapture={handleNormalCapture}
