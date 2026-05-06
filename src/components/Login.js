@@ -93,7 +93,7 @@ function Login() {
               <div className="absolute -top-16 -left-8 w-72 h-72 pointer-events-none">
                 {/* Drop your transparent Female character PNG here */}
                 <img 
-                  src="../../static/images/login_girl.png" 
+                  src="../assets/images/login_girl.png" 
                   alt="Exam Creation" 
                   className="w-full h-full object-contain drop-shadow-2xl" 
                 />
@@ -123,7 +123,7 @@ function Login() {
               <div className="absolute -top-16 -right-6 w-72 h-72 pointer-events-none">
                 {/* Drop your transparent Male character PNG here */}
                 <img 
-                  src="../../static/images/login_boy.png" 
+                  src="../assets/images/login_boy.png" 
                   alt="AI Proctoring" 
                   className="w-full h-full object-contain drop-shadow-2xl" 
                 />
