@@ -3,7 +3,7 @@ import { ref, get, update } from "firebase/database";
 import React, { useState } from "react";
 import { auth, database } from "../services/firebase";
 import { ToastContainer, toast } from "react-toastify";
-import SignInwithGoogle from "./signInWithGoogle";
+// import SignInwithGoogle from "./signInWithGoogle";
 import { v4 as uuidv4 } from "uuid";
 import "react-toastify/dist/ReactToastify.css";
 import loginGirl from '../assets/images/login_girl.png';
@@ -220,9 +220,9 @@ function Login() {
             </div>
           </div>
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <SignInwithGoogle />
-          </div>
+          </div> */}
 
           <div className="mt-6 text-center text-sm text-slate-600">
             If you do not have an Account,{" "}
