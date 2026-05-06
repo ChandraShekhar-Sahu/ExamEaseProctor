@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
+import React, { useState } from "react";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, database } from "../services/firebase";
 import { ref, get, set, update } from "firebase/database";
 import { toast } from "react-toastify";
@@ -10,72 +10,58 @@ function SignInwithGoogle() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
 
-  
-// 1. This useEffect catches the user when they bounce back from Google's website
-  useEffect(() => {
-    const handleRedirectComplete = async () => {
-      console.log("🔍 STEP 1: Checking for Google Redirect...");
-      try {
-        const result = await getRedirectResult(auth);
-        console.log("🔍 STEP 2: Firebase returned this result:", result);
-        
-        if (result) {
-          console.log("✅ STEP 3: Google User found! Processing database...");
-          setIsLoggingIn(true);
-          const user = result.user;
-          const userRef = ref(database, `Users/${user.uid}`);
-          const userSnapshot = await get(userRef);
-          const sessionKey = uuidv4();
-
-          if (userSnapshot.exists()) {
-            // USER ALREADY EXISTS - Log them in
-            console.log("✅ STEP 4A: Returning user. Updating session...");
-            await update(userRef, { sessionKey: sessionKey });
-            localStorage.setItem("sessionKey", sessionKey);
-            toast.success("Google Login successful!", { position: "top-center" });
-            navigate("/exams"); 
-
-          } else {
-            // NEW USER - Create their account
-            console.log("✅ STEP 4B: New user. Creating account...");
-            const nameParts = user.displayName ? user.displayName.split(" ") : ["", ""];
-            const firstName = nameParts[0] || "";
-            const lastName = nameParts.slice(1).join(" ") || "";
-
-            await set(userRef, {
-              email: user.email,
-              firstName: firstName,
-              lastName: lastName,
-              photo: user.photoURL,
-              role: "User",
-              createdAt: new Date().toISOString(),
-              sessionKey: sessionKey,
-              exams: [], 
-            });
-
-            localStorage.setItem("sessionKey", sessionKey);
-            toast.success("Google Account created successfully!", { position: "top-center" });
-            navigate("/profile");
-          }
-        } else {
-           console.log("⚠️ STEP 3: Result was null. This is normal if you haven't clicked the button yet.");
-        }
-      } catch (error) {
-        console.error("🚨 REDIRECT ERROR:", error.message);
-      } finally {
-        setIsLoggingIn(false);
-      }
-    };
-
-    handleRedirectComplete();
-  }, [navigate]);
-
-  // 2. This function triggers the secure redirect
-  const googleLogin = () => {
+  const googleLogin = async () => {
     setIsLoggingIn(true);
     const provider = new GoogleAuthProvider();
-    // Use Redirect instead of Popup
-    signInWithRedirect(auth, provider);
+
+    try {
+      // USING POPUP NOW THAT WE ARE ON VERCEL
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      if (user) {
+        const userRef = ref(database, `Users/${user.uid}`);
+        const userSnapshot = await get(userRef);
+        const sessionKey = uuidv4();
+
+        if (userSnapshot.exists()) {
+          // USER ALREADY EXISTS
+          await update(userRef, { sessionKey: sessionKey });
+          localStorage.setItem("sessionKey", sessionKey);
+          toast.success("Google Login successful!", { position: "top-center" });
+          navigate("/exams"); 
+
+        } else {
+          // NEW USER
+          const nameParts = user.displayName ? user.displayName.split(" ") : ["", ""];
+          const firstName = nameParts[0] || "";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          await set(userRef, {
+            email: user.email,
+            firstName: firstName,
+            lastName: lastName,
+            photo: user.photoURL,
+            role: "User",
+            createdAt: new Date().toISOString(),
+            sessionKey: sessionKey,
+            exams: [], 
+          });
+
+          localStorage.setItem("sessionKey", sessionKey);
+          toast.success("Google Account created successfully!", { position: "top-center" });
+          navigate("/profile");
+        }
+      }
+    } catch (error) {
+      console.error("Google Login failed:", error.message);
+      // Ignore the error if the user just manually closed the popup
+      if (error.code !== 'auth/popup-closed-by-user') {
+         toast.error("Authentication failed: " + error.message, { position: "bottom-center" });
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
