@@ -65,12 +65,12 @@ function Login() {
       <ToastContainer />
       
       {/* Universal Soft Decorative Background Blobs */}
-      <div className="absolute top-[-0%] left-[-10%] w-[50vw] h-[50vw] bg-blue-300/30 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-300/30 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-cyan-300/30 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
 
       {/* LEFT SIDE: Branding & Features */}
-      <div className="hidden md:flex md:w-1/2 flex-col relative z-10">
-        <div className="flex flex-col items-center justify-center h-full p-6 lg:px-12 w-full max-w-2xl md:ml-auto md:mr-2 xl:mr-2">
+      <div className="hidden lg:flex lg:w-1/2 flex-col relative z-10">
+        <div className="flex flex-col items-center justify-center h-full p-12 w-full max-w-2xl lg:ml-auto lg:mr-2 xl:mr-2">
           {/* Logo & Header */}
           <div className="flex items-center gap-3 mb-4">
             <svg className="w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

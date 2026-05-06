@@ -58,8 +58,8 @@ function SignInwithGoogle() {
         style={{ display: "flex", justifyContent: "center", cursor: "pointer" }}
         onClick={googleLogin}
       >
-        <img src={googleimage} alt="Google Sign-In" width="60%" />
-        {/* <div className="w-[60vh] bg-cover bg-center bg-[url({google})]"></div> */}
+        {/* <img src="../assets/images/google.jpg" alt="Google Sign-In" width="60%" /> */}
+        <div className="w-[60vh] bg-cover bg-center bg-[url('../assets/images/google.jpg')]"></div>
       </div>
     </div>
   );
