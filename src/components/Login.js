@@ -3,7 +3,7 @@ import { ref, get, update } from "firebase/database";
 import React, { useState } from "react";
 import { auth, database } from "../services/firebase";
 import { ToastContainer, toast } from "react-toastify";
-// import SignInwithGoogle from "./signInWithGoogle";
+import SignInwithGoogle from "./signInWithGoogle";
 import { v4 as uuidv4 } from "uuid";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -93,7 +93,7 @@ function Login() {
               <div className="absolute -top-16 -left-8 w-72 h-72 pointer-events-none">
                 {/* Drop your transparent Female character PNG here */}
                 <img 
-                  src="../../static/images/login_girl.png" 
+                  src="../../assets/images/login_girl.png" 
                   alt="Exam Creation" 
                   className="w-full h-full object-contain drop-shadow-2xl" 
                 />
@@ -123,7 +123,7 @@ function Login() {
               <div className="absolute -top-16 -right-6 w-72 h-72 pointer-events-none">
                 {/* Drop your transparent Male character PNG here */}
                 <img 
-                  src="../../static/images/login_boy.png" 
+                  src="../../assets/images/login_boy.png" 
                   alt="AI Proctoring" 
                   className="w-full h-full object-contain drop-shadow-2xl" 
                 />
@@ -226,9 +226,9 @@ function Login() {
             </div>
           </div>
 
-          {/* <div className="mt-6">
+          <div className="mt-6">
             <SignInwithGoogle />
-          </div> */}
+          </div>
 
           <div className="mt-8 text-center text-sm text-slate-600">
             If you do not have an Account,{" "}

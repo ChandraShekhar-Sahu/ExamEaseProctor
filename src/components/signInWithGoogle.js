@@ -53,7 +53,6 @@ function SignInwithGoogle() {
 
   return (
     <div>
-      <p className="continue-p text-center pb-5">--Or continue with--</p>
       <div
         style={{ display: "flex", justifyContent: "center", cursor: "pointer" }}
         onClick={googleLogin}
