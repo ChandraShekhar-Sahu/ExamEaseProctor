@@ -60,8 +60,7 @@ function Login() {
   };
 
   return (
-// {/* ENTIRE SCREEN BACKGROUND (Option 3 Colors applied globally) */}
-    // {/* ENTIRE SCREEN BACKGROUND */}
+   // {/* ENTIRE SCREEN BACKGROUND */}
     <div className="min-h-screen flex w-full font-sans bg-gradient-to-br from-sky-100 via-white to-blue-50 relative overflow-hidden">
       <ToastContainer />
       
@@ -85,16 +84,46 @@ function Login() {
           <p className="text-slate-600 text-lg mb-4 text-center font-medium">Secure Testing, Simplified. Sign in to your account.</p>
 
           {/* CHANGED: Added md:scale-[0.80] lg:scale-100 origin-center so it fits perfectly on tablets */}
-          <div className="relative w-full max-w-md lg:max-w-lg mx-auto h-[450px] mb-4 mt-2 md:scale-[0.80] lg:scale-100 origin-center transition-transform">
+          <div className="relative w-full max-w-md lg:max-w-lg mx-auto h-[450px] mb-4 mt-10 md:scale-[0.80] lg:scale-100 origin-center transition-transform">
             
             {/* Soft Background Glow */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-72 h-72 bg-sky-400/20 rounded-full blur-3xl"></div>
             </div>
 
-            {/* Card 1: Exam Creation */}
-            <div className="absolute top-0 left-0 w-64 h-72 bg-white/70 backdrop-blur-xl rounded-3xl border border-white shadow-2xl transform -rotate-3 hover:rotate-0 hover:-translate-y-2 transition-all duration-500 z-10">
+{/* Card 1: AI Proctoring (Moved to Top-Left, sent to back z-10) */}
+            <div className="absolute top-0 left-0 w-64 h-72 bg-white/70  backdrop-blur-xl rounded-3xl border border-white shadow-2xl transform -rotate-3 hover:rotate-0 hover:-translate-y-2 transition-all duration-500 z-10">
+              {/* Notice the offset is now -left-8 so he pops out of the left side naturally */}
               <div className="absolute -top-16 -left-8 w-72 h-72 pointer-events-none">
+                <img 
+                  src={loginBoy} 
+                  alt="AI Proctoring" 
+                  className="w-full h-full object-contain drop-shadow-2xl" 
+                />
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-700 border border-slate-600 flex items-center justify-center shadow-sm relative overflow-hidden">
+                    <div className="absolute inset-0 bg-sky-400/20 animate-pulse"></div>
+                    <svg className="w-5 h-5 text-sky-400 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm">Live AI Proctoring</h3>
+                    <p className="text-[10px] text-sky-500 uppercase tracking-wider font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Active
+                    </p>
+                  </div>
+                </div>
+                <div className="w-full h-1.5 bg-slate-600/50 rounded-full mb-1.5"></div>
+                <div className="w-3/4 h-1.5 bg-slate-600/50 rounded-full"></div>
+              </div>
+            </div>
+
+            {/* Card 2: Exam Creation (Moved to Bottom-Right, brought to front z-20) */}
+            <div className="absolute bottom-0 right-0 w-64 h-72 bg-slate-800/90 backdrop-blur-xl rounded-3xl border border-slate-700 shadow-2xl transform rotate-3 hover:rotate-0 hover:-translate-y-2 transition-all duration-500 z-20">
+              {/* Notice the offset is now -right-6 so she pops out of the right side naturally */}
+              <div className="absolute -top-16 -right-6 w-72 h-72 pointer-events-none">
                 <img 
                   src={loginGirl} 
                   alt="Exam Creation" 
@@ -108,40 +137,12 @@ function Login() {
                     <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 text-sm">Setup & Create</h3>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Teacher Portal</p>
+                    <h3 className="font-bold text-white text-sm">Setup & Create</h3>
+                    <p className="text-[10px] text-sky-200 uppercase tracking-wider font-semibold">Teacher Portal</p>
                   </div>
                 </div>
                 <div className="w-full h-1.5 bg-slate-200/60 rounded-full mb-1.5"></div>
                 <div className="w-2/3 h-1.5 bg-slate-200/60 rounded-full"></div>
-              </div>
-            </div>
-
-            {/* Card 2: AI Proctoring */}
-            <div className="absolute bottom-0 right-0 w-64 h-72 bg-slate-800/90 backdrop-blur-xl rounded-3xl border border-slate-700 shadow-2xl transform rotate-3 hover:rotate-0 hover:-translate-y-2 transition-all duration-500 z-20">
-              <div className="absolute -top-16 -right-6 w-72 h-72 pointer-events-none">
-                <img 
-                  src={loginBoy}
-                  alt="AI Proctoring" 
-                  className="w-full h-full object-contain drop-shadow-2xl" 
-                />
-              </div>
-
-              <div className="absolute bottom-6 left-6 right-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-700 border border-slate-600 flex items-center justify-center shadow-sm relative overflow-hidden">
-                    <div className="absolute inset-0 bg-sky-400/20 animate-pulse"></div>
-                    <svg className="w-5 h-5 text-sky-400 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-white text-sm">Live AI Proctoring</h3>
-                    <p className="text-[10px] text-sky-400 uppercase tracking-wider font-semibold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Active
-                    </p>
-                  </div>
-                </div>
-                <div className="w-full h-1.5 bg-slate-600/50 rounded-full mb-1.5"></div>
-                <div className="w-3/4 h-1.5 bg-slate-600/50 rounded-full"></div>
               </div>
             </div>
 
