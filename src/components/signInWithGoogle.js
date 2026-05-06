@@ -1,67 +1,98 @@
-import React from "react";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth, db } from "../services/firebase";
+import React, { useState, useEffect } from "react";
+import { GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
+import { auth, database } from "../services/firebase";
+import { ref, get, set, update } from "firebase/database";
 import { toast } from "react-toastify";
-import { setDoc, doc, getDoc } from "firebase/firestore";
-import {googleimage} from '../assets/images/google.jpg';
-
+import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 
 function SignInwithGoogle() {
-  // Function to handle Google login
-  const googleLogin = async () => {
-    const provider = new GoogleAuthProvider();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const navigate = useNavigate();
 
-    try {
-      // Sign in the user with Google
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+  
+// 1. This useEffect catches the user when they bounce back from Google's website
+  useEffect(() => {
+    const handleRedirectComplete = async () => {
+      console.log("🔍 STEP 1: Checking for Google Redirect...");
+      try {
+        const result = await getRedirectResult(auth);
+        console.log("🔍 STEP 2: Firebase returned this result:", result);
+        
+        if (result) {
+          console.log("✅ STEP 3: Google User found! Processing database...");
+          setIsLoggingIn(true);
+          const user = result.user;
+          const userRef = ref(database, `Users/${user.uid}`);
+          const userSnapshot = await get(userRef);
+          const sessionKey = uuidv4();
 
-      if (user) {
-        // Reference to the user's document in Firestore
-        const userDocRef = doc(db, "Users", user.uid);
-        const userDoc = await getDoc(userDocRef);
+          if (userSnapshot.exists()) {
+            // USER ALREADY EXISTS - Log them in
+            console.log("✅ STEP 4A: Returning user. Updating session...");
+            await update(userRef, { sessionKey: sessionKey });
+            localStorage.setItem("sessionKey", sessionKey);
+            toast.success("Google Login successful!", { position: "top-center" });
+            navigate("/exams"); 
 
-        if (userDoc.exists()) {
-          // If user document exists, log in the user
-          toast.success("User logged in successfully", {
-            position: "top-center",
-          });
-          window.location.href = "/profile";
+          } else {
+            // NEW USER - Create their account
+            console.log("✅ STEP 4B: New user. Creating account...");
+            const nameParts = user.displayName ? user.displayName.split(" ") : ["", ""];
+            const firstName = nameParts[0] || "";
+            const lastName = nameParts.slice(1).join(" ") || "";
+
+            await set(userRef, {
+              email: user.email,
+              firstName: firstName,
+              lastName: lastName,
+              photo: user.photoURL,
+              role: "User",
+              createdAt: new Date().toISOString(),
+              sessionKey: sessionKey,
+              exams: [], 
+            });
+
+            localStorage.setItem("sessionKey", sessionKey);
+            toast.success("Google Account created successfully!", { position: "top-center" });
+            navigate("/profile");
+          }
         } else {
-          // If user document does not exist, create it with default information
-          await setDoc(userDocRef, {
-            email: user.email,
-            firstName: user.displayName,
-            photo: user.photoURL,
-            lastName: "", // Placeholder for last name, if required later
-          });
-
-          // Notify the user that the account was created
-          toast.success("Account created successfully. Please log in again.", {
-            position: "top-center",
-          });
-          window.location.href = "/login";
+           console.log("⚠️ STEP 3: Result was null. This is normal if you haven't clicked the button yet.");
         }
+      } catch (error) {
+        console.error("🚨 REDIRECT ERROR:", error.message);
+      } finally {
+        setIsLoggingIn(false);
       }
-    } catch (error) {
-      // Handle errors in the login process
-      console.error("Login failed:", error.message);
-      toast.error("Authentication failed: " + error.message, {
-        position: "top-center",
-      });
-    }
+    };
+
+    handleRedirectComplete();
+  }, [navigate]);
+
+  // 2. This function triggers the secure redirect
+  const googleLogin = () => {
+    setIsLoggingIn(true);
+    const provider = new GoogleAuthProvider();
+    // Use Redirect instead of Popup
+    signInWithRedirect(auth, provider);
   };
 
   return (
-    <div>
-      <div
-        style={{ display: "flex", justifyContent: "center", cursor: "pointer" }}
-        onClick={googleLogin}
-      >
-        {/* <img src="../assets/images/google.jpg" alt="Google Sign-In" width="60%" /> */}
-        <div className="w-[60vh] bg-cover bg-center bg-[url('../assets/images/google.jpg')]"></div>
-      </div>
-    </div>
+    <button
+      onClick={googleLogin}
+      disabled={isLoggingIn}
+      type="button"
+      className="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 text-slate-700 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors shadow-sm font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
+    >
+      <svg className="w-5 h-5" viewBox="0 0 24 24">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+      </svg>
+      {isLoggingIn ? "Connecting to Google..." : "Sign in with Google"}
+    </button>
   );
 }
 
