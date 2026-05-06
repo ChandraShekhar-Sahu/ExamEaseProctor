@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { database } from './firebase'; 
+import { database } from '../services/firebase'; 
 import { ref, onValue } from 'firebase/database';
 import toast, { Toaster } from 'react-hot-toast'; 
 import Navbar from './header';
