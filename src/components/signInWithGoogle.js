@@ -3,6 +3,7 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, db } from "../services/firebase";
 import { toast } from "react-toastify";
 import { setDoc, doc, getDoc } from "firebase/firestore";
+import {googleimage} from '../assets/images/google.jpg';
 
 
 function SignInwithGoogle() {
@@ -57,8 +58,8 @@ function SignInwithGoogle() {
         style={{ display: "flex", justifyContent: "center", cursor: "pointer" }}
         onClick={googleLogin}
       >
-        {/* <img src="../assets/images/google.jpg" alt="Google Sign-In" width="60%" /> */}
-        <div className="w-[60vh] bg-cover bg-center bg-[url('../assets/images/google.jpg')]"></div>
+        <img src={googleimage} alt="Google Sign-In" width="60%" />
+        {/* <div className="w-[60vh] bg-cover bg-center bg-[url({google})]"></div> */}
       </div>
     </div>
   );
