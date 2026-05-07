@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth, database } from './firebase'; 
+import { auth, database } from '../services/firebase'; 
 import { onAuthStateChanged } from 'firebase/auth'; 
 import { ref, get } from "firebase/database"; 
 import Navbar from './header';
