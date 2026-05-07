@@ -21,9 +21,7 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   
-  // NEW: State for our elegant Tab system
   const [activeTab, setActiveTab] = useState('personal');
-
   const CLOUDINARY_UPLOAD_PRESET = "exam-ease-proctor"; 
 
   useEffect(() => {
@@ -174,7 +172,6 @@ function Profile() {
     ]
   };
 
-  // --- SMART FIELD RENDERER (Read vs Edit Mode) ---
   const renderField = (item) => (
     <div key={item.field} className="flex flex-col group">
       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
@@ -183,14 +180,12 @@ function Profile() {
       </label>
       
       {!isEditing ? (
-        // READ MODE: Beautiful, clean text display
         <div className="py-2 border-b border-slate-100 group-hover:border-slate-200 transition-colors">
           <p className={`text-sm font-semibold ${user[item.field] ? 'text-slate-800' : 'text-slate-300 italic'}`}>
             {user[item.field] || 'Not provided'}
           </p>
         </div>
       ) : (
-        // EDIT MODE: Clean input fields
         item.type === "select" ? (
           <select
             value={user[item.field] || ""}
@@ -220,10 +215,17 @@ function Profile() {
       <Navbar />
       <ToastContainer position="top-center" autoClose={2000} hideProgressBar />
 
-      {/* --- SLIM, SOFT GEOMETRIC BANNER --- */}
-      <div className="h-48 w-full relative overflow-hidden bg-white border-b border-slate-200/60">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f8fafc_1px,transparent_1px),linear-gradient(to_bottom,#f8fafc_1px,transparent_1px)] bg-[size:2rem_2rem]"></div>
-        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-indigo-400 opacity-20 blur-[100px]"></div>
+      {/* --- DYNAMIC AURORA BANNER --- */}
+      <div className="h-60 w-full relative overflow-hidden bg-slate-900 border-b border-slate-800">
+        {/* Vibrant Glowing Orbs */}
+        <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[150%] rounded-full bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 blur-[80px] opacity-70"></div>
+        <div className="absolute top-[10%] -right-[10%] w-[50%] h-[150%] rounded-full bg-gradient-to-l from-fuchsia-600 via-rose-500 to-orange-500 blur-[100px] opacity-60"></div>
+        
+        {/* Glassmorphic Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:3rem_3rem]"></div>
+        
+        {/* Bottom Fade for smooth blending */}
+        <div className="absolute bottom-0 w-full h-24 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
       </div>
 
       {/* --- MAIN COMPACT LAYOUT --- */}
@@ -232,7 +234,7 @@ function Profile() {
           
           {/* LEFT SIDEBAR: Avatar & Controls */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col items-center text-center">
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 p-6 flex flex-col items-center text-center">
               
               {/* Avatar */}
               <div className="relative group -mt-16 mb-4">
@@ -297,7 +299,7 @@ function Profile() {
 
           {/* RIGHT CONTENT: Tabs & Data */}
           <div className="lg:col-span-8">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px] flex flex-col">
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden min-h-[400px] flex flex-col">
               
               {/* Custom Tab Navigation */}
               <div className="flex border-b border-slate-100 bg-slate-50/50">
@@ -316,8 +318,7 @@ function Profile() {
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={tab.icon} />
                     </svg>
-                    {tab.name}
-                    {/* Active Tab Indicator */}
+                    <span className="hidden sm:inline">{tab.name}</span>
                     {activeTab === tab.id && (
                       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"></div>
                     )}
