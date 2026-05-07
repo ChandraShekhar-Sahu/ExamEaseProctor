@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from '../services/firebase'; 
+import { auth } from './firebase'; 
 import { getDatabase, ref, get, set } from 'firebase/database'; 
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
@@ -20,9 +20,11 @@ function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // NEW: State for our elegant Tab system
+  const [activeTab, setActiveTab] = useState('personal');
 
-  // --- REPLACE WITH YOUR CLOUDINARY UNNAMED UPLOAD PRESET ---
-  const CLOUDINARY_UPLOAD_PRESET = "exam-ease-proctor"; // Change this to your preset name!
+  const CLOUDINARY_UPLOAD_PRESET = "exam-ease-proctor"; 
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -72,7 +74,6 @@ function Profile() {
     setLoading(false);
   };
 
-  // --- UPDATED CLOUDINARY UPLOAD LOGIC ---
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -88,35 +89,25 @@ function Profile() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET); 
-  
 
     try {
       const response = await fetch(
         "https://api.cloudinary.com/v1_1/dknoeudoc/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
+        { method: "POST", body: formData }
       );
-
       const data = await response.json();
 
       if (data.secure_url) {
-        // Save the Cloudinary link to Firebase Realtime Database
         const db = getDatabase();
         const userRef = ref(db, "Users/" + userId);
-        
-        // Update Firebase
         await set(userRef, { ...user, photoURL: data.secure_url });
-        
-        // Update local state
         setUser((prev) => ({ ...prev, photoURL: data.secure_url }));
-        toast.success("Profile image uploaded to Cloudinary!");
+        toast.success("Profile image updated!");
       } else {
         throw new Error("Upload failed");
       }
     } catch (error) {
-      toast.error("Cloudinary upload error: " + error.message);
+      toast.error("Upload error: " + error.message);
     } finally {
       setIsUploading(false);
     }
@@ -124,10 +115,7 @@ function Profile() {
 
   const handleProfileUpdate = async () => {
     const userId = auth.currentUser?.uid;
-    if (!userId) {
-      toast.error("User not logged in.");
-      return;
-    }
+    if (!userId) return;
 
     try {
       const db = getDatabase();
@@ -138,7 +126,6 @@ function Profile() {
       setIsEditing(false);
     } catch (error) {
       toast.error("Failed to update profile.");
-      console.error("Error updating profile: ", error);
     }
   };
 
@@ -150,167 +137,204 @@ function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
-  // (The rest of your personalFields, locationFields, academicFields, and renderField functions remain exactly the same)
-  const personalFields = [
-    { label: "First Name", field: "firstName", type: "text" },
-    { label: "Last Name", field: "lastName", type: "text" },
-    { label: "Email Address", field: "email", type: "email", disabled: true },
-    { label: "Mobile Number", field: "mobileNumber", type: "tel" },
-    { label: "Date of Birth", field: "dob", type: "date" },
-    { label: "Gender", field: "gender", type: "select", options: ["Male", "Female", "Other"] },
-  ];
+  // --- DATA STRUCTURES ---
+  const tabData = {
+    personal: [
+      { label: "First Name", field: "firstName", type: "text" },
+      { label: "Last Name", field: "lastName", type: "text" },
+      { label: "Email Address", field: "email", type: "email", disabled: true },
+      { label: "Mobile Number", field: "mobileNumber", type: "tel" },
+      { label: "Date of Birth", field: "dob", type: "date" },
+      { label: "Gender", field: "gender", type: "select", options: ["Male", "Female", "Other"] },
+    ],
+    location: [
+      { label: "Country", field: "country", type: "text" },
+      { label: "State", field: "state", type: "text" },
+      { label: "City/District", field: "city", type: "text" },
+      { label: "Pincode", field: "pincode", type: "text" },
+    ],
+    academic: [
+      { label: "Highest Qualification", field: "qualification", type: "text" },
+      { label: "Profession", field: "profession", type: "text" },
+      { label: "Year of Graduation", field: "yearOfGraduation", type: "number" },
+      { label: "Degree", field: "degree", type: "text" },
+      { label: "Department", field: "department", type: "text" },
+      { label: "Study Year", field: "studyYear", type: "text" },
+      { label: "College Name", field: "collegeName", type: "text" },
+      { label: "University Name", field: "universityName", type: "text" },
+      { label: "College Roll No.", field: "rollNo", type: "text" },
+      { label: "ABC ID", field: "abcId", type: "text" },
+      { label: "Local Chapter State", field: "localChapterState", type: "text" },
+      { label: "Portfolio / URL", field: "companyURL", type: "url" },
+    ]
+  };
 
-  const locationFields = [
-    { label: "Country", field: "country", type: "text" },
-    { label: "State", field: "state", type: "text" },
-    { label: "City/District", field: "city", type: "text" },
-    { label: "Pincode", field: "pincode", type: "text" },
-  ];
-
-  const academicFields = [
-    { label: "Highest Qualification", field: "qualification", type: "text" },
-    { label: "Profession", field: "profession", type: "text" },
-    { label: "Year of Graduation", field: "yearOfGraduation", type: "number" },
-    { label: "Degree", field: "degree", type: "text" },
-    { label: "Department", field: "department", type: "text" },
-    { label: "Study Year", field: "studyYear", type: "text" },
-    { label: "College Name", field: "collegeName", type: "text" },
-    { label: "University Name", field: "universityName", type: "text" },
-    { label: "College Roll No.", field: "rollNo", type: "text" },
-    { label: "ABC ID", field: "abcId", type: "text" },
-    { label: "Local Chapter State", field: "localChapterState", type: "text" },
-    { label: "Company/Portfolio URL", field: "companyURL", type: "url" },
-  ];
-
+  // --- SMART FIELD RENDERER (Read vs Edit Mode) ---
   const renderField = (item) => (
-    <div key={item.field} className="flex flex-col">
-      <label className="text-slate-600 text-xs font-bold uppercase tracking-wider mb-1">
-        {item.label} {item.disabled ? "" : <span className="text-rose-500">*</span>}
+    <div key={item.field} className="flex flex-col group">
+      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+        {item.label}
+        {isEditing && !item.disabled && <span className="text-indigo-400">*</span>}
       </label>
-      {item.type === "select" ? (
-        <select
-          value={user[item.field] || ""}
-          onChange={(e) => setUser({ ...user, [item.field]: e.target.value })}
-          disabled={!isEditing || item.disabled}
-          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-100 disabled:text-slate-500 transition-all shadow-sm"
-        >
-          <option value="" disabled>Select {item.label}</option>
-          {item.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
+      
+      {!isEditing ? (
+        // READ MODE: Beautiful, clean text display
+        <div className="py-2 border-b border-slate-100 group-hover:border-slate-200 transition-colors">
+          <p className={`text-sm font-semibold ${user[item.field] ? 'text-slate-800' : 'text-slate-300 italic'}`}>
+            {user[item.field] || 'Not provided'}
+          </p>
+        </div>
       ) : (
-        <input
-          type={item.type}
-          value={user[item.field] || ""}
-          onChange={(e) => setUser({ ...user, [item.field]: e.target.value })}
-          disabled={!isEditing || item.disabled}
-          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-100 disabled:text-slate-500 transition-all shadow-sm"
-          placeholder={`Enter ${item.label}`}
-        />
+        // EDIT MODE: Clean input fields
+        item.type === "select" ? (
+          <select
+            value={user[item.field] || ""}
+            onChange={(e) => setUser({ ...user, [item.field]: e.target.value })}
+            disabled={item.disabled}
+            className="w-full p-2.5 text-sm bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-400"
+          >
+            <option value="" disabled>Select {item.label}</option>
+            {item.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        ) : (
+          <input
+            type={item.type}
+            value={user[item.field] || ""}
+            onChange={(e) => setUser({ ...user, [item.field]: e.target.value })}
+            disabled={item.disabled}
+            placeholder={`Enter ${item.label.toLowerCase()}`}
+            className="w-full p-2.5 text-sm bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-400"
+          />
+        )
       )}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans pb-12">
+    <div className="min-h-screen bg-slate-50 font-sans pb-12">
       <Navbar />
-      <ToastContainer position="top-center" />
+      <ToastContainer position="top-center" autoClose={2000} hideProgressBar />
 
-      {/* Header UI remains exactly the same as the previous redesign */}
-      <div className="bg-gradient-to-r from-indigo-800 via-purple-700 to-indigo-900 pt-24 pb-32 px-4 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
-          <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full bg-white blur-3xl"></div>
-          <div className="absolute bottom-0 right-10 w-72 h-72 rounded-full bg-cyan-400 blur-3xl"></div>
-        </div>
-
-        <div className="max-w-5xl mx-auto relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
-          <div className="relative group">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-white relative">
-              <img
-                src={user.photoURL || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
-                alt="Profile"
-                className={`w-full h-full object-cover transition-opacity duration-300 ${isUploading ? 'opacity-50' : ''}`}
-              />
-              {isUploading && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
-                  <span className="text-white text-xs font-bold">Uploading...</span>
-                </div>
-              )}
-              {!isUploading && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
-                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-              onChange={handlePhotoUpload}
-              disabled={isUploading}
-            />
-          </div>
-
-          <div className="mb-4 md:mb-6">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-md">
-              {user.name || 'Complete Your Profile'}
-            </h1>
-            <p className="text-indigo-200 text-lg flex items-center justify-center md:justify-start gap-2 mt-1">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              {user.email}
-            </p>
-          </div>
-        </div>
+      {/* --- SLIM, SOFT GEOMETRIC BANNER --- */}
+      <div className="h-48 w-full relative overflow-hidden bg-white border-b border-slate-200/60">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f8fafc_1px,transparent_1px),linear-gradient(to_bottom,#f8fafc_1px,transparent_1px)] bg-[size:2rem_2rem]"></div>
+        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-indigo-400 opacity-20 blur-[100px]"></div>
       </div>
 
-      {/* Main Form UI remains exactly the same */}
-      <div className="max-w-5xl mx-auto px-4 -mt-16 relative z-20">
-        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 border border-slate-200">
-          <div>
-            <h2 className="text-xl font-bold text-slate-800">Account Details</h2>
-            <p className="text-slate-500 text-sm">Manage your personal and academic information.</p>
-          </div>
-          <div className="flex gap-3 w-full md:w-auto">
-            {isEditing ? (
-              <>
-                <button onClick={handleCancel} className="flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancel</button>
-                <button onClick={handleProfileUpdate} className="flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md transition-all flex items-center justify-center gap-2">Save Changes</button>
-              </>
-            ) : (
-              <button onClick={() => setIsEditing(true)} className="w-full md:w-auto px-6 py-2.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2">Edit Profile</button>
-            )}
-          </div>
-        </div>
+      {/* --- MAIN COMPACT LAYOUT --- */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* LEFT SIDEBAR: Avatar & Controls */}
+          <div className="lg:col-span-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col items-center text-center">
+              
+              {/* Avatar */}
+              <div className="relative group -mt-16 mb-4">
+                <div className="w-28 h-28 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-slate-100 rotate-3 transition-transform duration-300 group-hover:rotate-0">
+                  <img
+                    src={user.photoURL || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
+                    alt="Profile"
+                    className={`w-full h-full object-cover ${isUploading ? 'opacity-40 grayscale' : ''}`}
+                  />
+                  {isUploading && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                    </div>
+                  )}
+                  {/* Edit Photo Button */}
+                  {!isUploading && (
+                    <label className="absolute bottom-1 right-1 bg-white p-1.5 rounded-lg shadow-md cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity border border-slate-100 hover:bg-slate-50">
+                      <svg className="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      </svg>
+                      <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                    </label>
+                  )}
+                </div>
+              </div>
 
-        <div className="space-y-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
-              <h3 className="text-lg font-bold text-slate-800">Personal Information</h3>
+              {/* User Identity */}
+              <h1 className="text-xl font-bold text-slate-900 mb-1">{user.name || 'User Profile'}</h1>
+              <p className="text-sm text-slate-500 font-medium mb-6">{user.email}</p>
+
+              {/* Action Buttons */}
+              <div className="w-full pt-6 border-t border-slate-100">
+                {isEditing ? (
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={handleProfileUpdate}
+                      className="w-full py-2.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all text-sm"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="w-full py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="w-full py-2.5 rounded-xl font-bold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 shadow-sm transition-all flex items-center justify-center gap-2 text-sm"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    Edit Profile Details
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{personalFields.map(renderField)}</div>
           </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
-              <h3 className="text-lg font-bold text-slate-800">Location Details</h3>
+
+          {/* RIGHT CONTENT: Tabs & Data */}
+          <div className="lg:col-span-8">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px] flex flex-col">
+              
+              {/* Custom Tab Navigation */}
+              <div className="flex border-b border-slate-100 bg-slate-50/50">
+                {[
+                  { id: 'personal', name: 'Personal Info', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+                  { id: 'location', name: 'Location', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z' },
+                  { id: 'academic', name: 'Academic', icon: 'M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z' }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-bold transition-all relative ${
+                      activeTab === tab.id ? 'text-indigo-600 bg-white' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'
+                    }`}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={tab.icon} />
+                    </svg>
+                    {tab.name}
+                    {/* Active Tab Indicator */}
+                    {activeTab === tab.id && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Dynamic Field Rendering */}
+              <div className="p-8 flex-grow">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                  {tabData[activeTab].map(renderField)}
+                </div>
+              </div>
+
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">{locationFields.map(renderField)}</div>
           </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
-              <h3 className="text-lg font-bold text-slate-800">Academic & Professional</h3>
-            </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{academicFields.map(renderField)}</div>
-          </div>
+
         </div>
       </div>
     </div>
