@@ -5,6 +5,7 @@ import { ref, get } from "firebase/database";
 import Navbar from './header';
 import Footer from './footer';
 
+
 // --- CUSTOM UI COMPONENTS ---
 const ScoreRing = ({ score }) => {
   const radius = 24;
