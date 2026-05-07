@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { database } from './firebase';
+import { database } from '../services/firebase';
 import { ref, get } from 'firebase/database';
 
 const ExamRulesCamera = () => {
