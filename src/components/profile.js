@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from './firebase'; 
+import { auth } from '../services/firebase'; 
 import { getDatabase, ref, get, set } from 'firebase/database'; 
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
